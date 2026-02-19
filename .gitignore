@@ -1,0 +1,14 @@
+#this file determines what files get stored to the git repo
+#that way compiled and generated and editor files don't get thrown in the repo
+
+#list your *code* files in here, or in put them in /functions/
+
+#ignore everything by default
+/*
+
+#don't ignore these files
+!.gitignore
+!main.cpp
+
+#don't ignore these folders
+!/functions
