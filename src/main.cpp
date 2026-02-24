@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 // King Her was here.
-//This is where the program starts
+// This is where the program starts...
 struct Record {
     string name;
     vector<string> companies;
