@@ -1,15 +1,50 @@
 #include <iostream>
 #include <string>
 #include <vector>
-// King Her was here.
-// This is where the program starts...
+#include <fstream>
+#include <sstream>
+#include <filesystem>
+#include <regex>
+#include <cstdlib>
+
+using namespace std;
+
 struct Record {
     string name;
-    vector<string> companies;
     string source;
+    string dob;
+    string address;
 
-    Record() {}
+    vector<string> companies;
 
-    Record(string n, vector<string> c, string s)
-        : name(n), companies(c), source(s) {}
+    Record() = default;
 };
+
+struct Node {
+    Record data;
+    Node* prev = nullptr;
+    Node* next = nullptr;
+    explicit Node(const Record& r) : data(r) {}
+};
+
+Class DoublyLinkedList {
+private:
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    size_t sz = 0;
+
+public: 
+    ~DoublyLinkedList () {clear(); }
+
+    void push_back(const Record& r) {
+        Node* n = new Node(r);
+        if (!tail) {
+            head = tail = n;
+        } else {
+            tail->next = n;
+            n->prev = tail;
+            tail = n;
+        }
+        ++sz;
+    }
+}
