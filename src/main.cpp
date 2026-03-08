@@ -1,7 +1,5 @@
-#include <iostream>
+#include "pipeline.hpp"
 
-//This is where the program starts
-int main() {
-    std::cout << "Hello World!";
-    return 0;
+int main(int argc, char** argv) {
+    return run_pipeline(argc, argv);
 }
