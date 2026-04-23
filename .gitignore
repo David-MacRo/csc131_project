@@ -4,11 +4,11 @@
 #list your *code* files in here, or in put them in /functions/
 
 #ignore everything by default
-/*
+# /*
 
 #don't ignore these files
-!.gitignore
-!main.cpp
+# !.gitignore
+# !main.cpp
 
 #don't ignore these folders
-!/functions
+# !/functions
