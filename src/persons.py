@@ -1,8 +1,9 @@
 from typing import Optional, Any
 import json
 
-from config import DATA_PATH
+from config import DATA_PATH, SLASH
 from api_calls import _get, _get_all
+
 
 def get_persons() -> list[dict]:
     return _get("persons")
@@ -34,9 +35,9 @@ def save_all_persons_votes() -> None:
             continue
         print(person["PersonFullName"])
         person.update({"Votes": votes})
-    with open(f"{DATA_PATH}\\persons.json", 'w') as file:
+    with open(f"{DATA_PATH}{SLASH}persons.json", 'w') as file:
         json.dump(persons, file, indent=4)
 
 def get_persons_from_file() -> list[dict]:
-    with open(f"{DATA_PATH}\\persons.json", 'r') as file:
+    with open(f"{DATA_PATH}{SLASH}persons.json", 'r') as file:
         return json.load(file)

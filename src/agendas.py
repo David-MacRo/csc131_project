@@ -3,7 +3,7 @@ import json
 import urllib.request
 
 from api_calls import _get, _get_all 
-from config import SOL_START, SOL_END, DATA_PATH
+from config import SOL_START, SOL_END, DATA_PATH, SLASH
 
 def fetch_events(start: str = SOL_START, end: str = SOL_END) -> list[dict]:
     """
@@ -58,7 +58,7 @@ def fetch_event_item_summary(event_id: int, event_item_id: int) -> None:
             with urllib.request.urlopen(req) as response:
                 summary = response.read()
             # summary = requests.get(attachment["MatterAttachmentHyperlink"])
-                pdf = open(f"summaries\\{event_item_id}_Summary_Report" + ".pdf", 'wb')
+                pdf = open(f"summaries{SLASH}{event_item_id}_Summary_Report" + ".pdf", 'wb')
                 pdf.write(summary)
                 pdf.close()
                 print(f"Downloading summary report for: {event_id} - {event_item_id}")
@@ -70,9 +70,9 @@ def fetch_all_summaries(event_item_ids) -> None:
 
 def save_event_item_ids(voted_items_ids) -> None:
     event_item_ids = fetch_event_item_ids(voted_items_ids)
-    with open(f"{DATA_PATH}\\event_item_ids.json", 'w') as file:
+    with open(f"{DATA_PATH}{SLASH}event_item_ids.json", 'w') as file:
         json.dump(event_item_ids, file, indent=4)
 
 def get_event_item_ids_from_file() -> list[dict]:
-    with open(f"{DATA_PATH}\\event_item_ids.json", 'r') as file:
+    with open(f"{DATA_PATH}{SLASH}event_item_ids.json", 'r') as file:
         return json.load(file)
