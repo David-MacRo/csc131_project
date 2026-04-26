@@ -1,0 +1,7 @@
+{
+    "base_url": "https://webapi.legistar.com/v1/sonoma-county",
+    "sol_start": "2019-01-01",
+    "sol_end": "2019-12-31",
+    "summary_path": "summaries",
+    "data_path": "data"
+}
