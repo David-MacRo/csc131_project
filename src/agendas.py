@@ -2,7 +2,8 @@ from typing import Optional, Any
 import json
 import urllib.request
 
-from api_calls import _get, _get_all 
+
+from api_calls import _get, _get_all, FileType
 from config import SOL_START, SOL_END, DATA_PATH, SLASH
 
 def fetch_events(start: str = SOL_START, end: str = SOL_END) -> list[dict]:
@@ -31,7 +32,7 @@ def fetch_agenda_items(event_id: int) -> list[dict]:
     return items
 
 def fetch_event_item_detail(event_id: int, event_item_id: int) -> list[dict]:
-    detail = _get(f"events/{event_id}/eventitems/{event_item_id}?Attachments=1")
+    detail = _get(f"events/{event_id}/eventitems/{event_item_id}?Attachments=1", FileType.JSON)
     return detail
 
 def fetch_event_item_ids(id_filter: list) -> None:
@@ -54,14 +55,12 @@ def fetch_event_item_summary(event_id: int, event_item_id: int) -> None:
     detail = fetch_event_item_detail(event_id, event_item_id)
     for attachment in detail["EventItemMatterAttachments"]:
         if "summary" in attachment["MatterAttachmentName"].lower():
-            req = urllib.request.Request(attachment["MatterAttachmentHyperlink"])
-            with urllib.request.urlopen(req) as response:
-                summary = response.read()
-            # summary = requests.get(attachment["MatterAttachmentHyperlink"])
-                pdf = open(f"summaries{SLASH}{event_item_id}_Summary_Report" + ".pdf", 'wb')
-                pdf.write(summary)
-                pdf.close()
-                print(f"Downloading summary report for: {event_id} - {event_item_id}")
+            link = attachment["MatterAttachmentHyperlink"]
+            summary = _get(link, FileType.PDF, False)
+            pdf = open(f"summaries{SLASH}{event_item_id}_Summary_Report" + ".pdf", 'wb')
+            pdf.write(summary)
+            pdf.close()
+            print(f"Downloading summary report for: {event_id} - {event_item_id}")
 
 def fetch_all_summaries(event_item_ids) -> None:
     for event_id, item_ids in event_item_ids.items():

@@ -5,7 +5,7 @@ from parse_summaries import search_summaries_for_match
 def main() -> None:
     # gets all persons who have voted and their votes and saves it to a file
     # can be commented out after it has been ran once for testing
-    save_all_persons_votes()
+    # save_all_persons_votes()
 
     # opens the file containing all persons and their votes
     persons = get_persons_from_file()

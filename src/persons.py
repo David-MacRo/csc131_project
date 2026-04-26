@@ -2,14 +2,14 @@ from typing import Optional, Any
 import json
 
 from config import DATA_PATH, SLASH
-from api_calls import _get, _get_all
+from api_calls import _get, _get_all, FileType
 
 
 def get_persons() -> list[dict]:
-    return _get("persons")
+    return _get("persons", FileType.JSON)
 
 def get_person_votes(person_id: int) -> list[dict]:
-    return _get(f"persons/{person_id}/votes")
+    return _get(f"persons/{person_id}/votes", FileType.JSON)
 
 def find_all_event_items_voters(persons_data: list[dict]) -> dict:
     voted_items_ids = {}
