@@ -10,6 +10,7 @@ from enum import Enum
 class FileType(Enum):
     JSON = 0
     PDF = 1
+    DOCX = 2
 
 
 def _get(endpoint: str, return_type: FileType = FileType.JSON, add_header: Optional[bool] = True, params: Optional[dict] = None) -> Any:
@@ -33,9 +34,12 @@ def _get(endpoint: str, return_type: FileType = FileType.JSON, add_header: Optio
                         return json.loads(decoded)
                     case FileType.PDF:
                         return body
-        
         except urllib.error.HTTPError as exc:
             print(f"  [HTTP {exc.code}] {url}")
+            if(exc.code == 406):
+                print(exc.headers)
+                print(f"ERROR: filetype is not correct! storing empty file")
+                return "ERROR".encode();
             time.sleep(2)
         except Exception as exc:
             print(f"  [ERROR] {url} – {exc}")
