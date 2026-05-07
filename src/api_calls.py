@@ -9,8 +9,6 @@ from config import BASE_URL
 
 def _get(endpoint: str, params: Optional[dict] = None) -> Any:
     url = f"{BASE_URL}/{endpoint.lstrip('/')}"
-    
-    wait_length = 0.5
 
     if params:
         url += "?" + urllib.parse.urlencode(params)
@@ -18,17 +16,16 @@ def _get(endpoint: str, params: Optional[dict] = None) -> Any:
     req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "CSC131-ConflictScraper/1.0"})
 
     while True:
-        wait_length = wait_length * 2
         try:
             with urllib.request.urlopen(req, timeout=20) as resp:
                 body = resp.read().decode("utf-8")
                 return json.loads(body)
         except urllib.error.HTTPError as exc:
             print(f"  [HTTP {exc.code}] {url}")
-            time.sleep(wait_length)
+            time.sleep(2)
         except Exception as exc:
             print(f"  [ERROR] {url} – {exc}")
-            time.sleep(wait_length)
+            time.sleep(2)
     
 def _get_all(endpoint: str, extra_params: Optional[dict] = None) -> list:
     """

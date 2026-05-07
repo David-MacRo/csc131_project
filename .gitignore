@@ -5,8 +5,6 @@
 
 #ignore everything by default
 # /*
-/summaries
-/data
 
 #don't ignore these files
 # !.gitignore
