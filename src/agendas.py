@@ -27,14 +27,15 @@ def fetch_events(start: str = SOL_START, end: str = SOL_END) -> list[dict]:
     return events
 
 def fetch_agenda_items(event_id: int) -> list[dict]:
-    items = _get_all(f"events/{event_id}/eventitems", {"AgendaNote": 1})
+    items = _get(f"events/{event_id}/eventitems", {"AgendaNote": 1})
+    # print(items)
     return items
 
 def fetch_event_item_detail(event_id: int, event_item_id: int) -> list[dict]:
-    detail = _get(f"events/{event_id}/eventitems/{event_item_id}?Attachments=1")
+    detail = _get(f"events/{event_id}/eventitems/{event_item_id}")
     return detail
 
-def fetch_event_item_ids(id_filter: list) -> None:
+def fetch_event_item_ids() -> None:
     events = fetch_events()
     event_item_ids = {}
     for event in events:
@@ -42,13 +43,28 @@ def fetch_event_item_ids(id_filter: list) -> None:
         event_item_ids.update({event["EventId"]: []})
 
         for item in event_items:
+            # print(item)
             if item is None:
                 continue
-            if item["EventItemId"] is not None:
-                if item["EventItemId"] in id_filter:
-                    event_item_ids[event['EventId']].append(item["EventItemId"])
+            if item["EventItemId"] is not None and item["EventItemPassedFlag"] is not None:
+                event_item_ids[event['EventId']].append([item["EventItemId"], item["EventItemMatterId"]])
         
     return {event_id: event_item_id_list for event_id, event_item_id_list in event_item_ids.items() if event_item_id_list != []}
+
+def fetch_event_item_votes(event_item_id: int) -> None:
+    event_item_votes = _get(f"eventitems/{event_item_id}/votes")
+    return event_item_votes
+
+def fetch_all_votes(event_item_ids) -> None:
+    event_item_votes = {}
+    for event_id, item_ids in event_item_ids.items():
+        for item_id, matter_id in item_ids:
+            votes = fetch_event_item_votes(item_id)
+            print(votes)
+            if votes != []:
+                event_item_votes.update({item_id: votes})
+    return event_item_votes
+
 
 def fetch_event_item_summary(event_id: int, event_item_id: int) -> None:
     detail = fetch_event_item_detail(event_id, event_item_id)
@@ -68,8 +84,13 @@ def fetch_all_summaries(event_item_ids) -> None:
         for item_id in item_ids:
             fetch_event_item_summary(event_id, item_id)
 
-def save_event_item_ids(voted_items_ids) -> None:
-    event_item_ids = fetch_event_item_ids(voted_items_ids)
+def save_event_item_votes(event_item_ids) -> None:
+    event_item_votes = fetch_all_votes(event_item_ids)
+    with open(f"{DATA_PATH}{SLASH}event_item_votes.json", 'w') as file:
+        json.dump(event_item_votes, file, indent=4)
+
+def save_event_item_ids() -> None:
+    event_item_ids = fetch_event_item_ids()
     with open(f"{DATA_PATH}{SLASH}event_item_ids.json", 'w') as file:
         json.dump(event_item_ids, file, indent=4)
 
