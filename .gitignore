@@ -7,6 +7,7 @@
 # /*
 /summaries
 /data
+/src/__pycache__
 
 #don't ignore these files
 # !.gitignore
