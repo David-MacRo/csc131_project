@@ -1,5 +1,6 @@
 from persons import save_all_persons_votes, get_persons_from_file, find_all_event_items_voters, find_matter_votes
 from agendas import save_event_item_ids, get_event_item_ids_from_file, save_event_item_votes, fetch_matter_text, save_all_matter_texts, list_matter_links
+from fetch_matters import fetch_list
 
 def main() -> None:
     # gets all persons who have voted and their votes and saves it to a file
@@ -18,7 +19,8 @@ def main() -> None:
 
     # # opens the file containing the item ids that have been voted on
     event_item_ids = get_event_item_ids_from_file()
-    list_matter_links(event_item_ids)
+    matter_links = list_matter_links(event_item_ids)
+    fetch_list(matter_links, "Aa")
 
     # downloads the "Summary Report" for the agendas that have been voted on
     # can be commented out after it has been ran once for testing
