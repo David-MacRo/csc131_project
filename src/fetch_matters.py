@@ -1,5 +1,6 @@
-import json
+from concurrent.futures import ThreadPoolExecutor
 
+import json
 from config import DATA_PATH, SLASH
 
 def fetch_list(matter_links: list, folder: str):
@@ -11,6 +12,14 @@ def fetch_list(matter_links: list, folder: str):
         if link in checked_urls:
             matter_links.remove(link)
     #create threads and split into sublists
+        #split lists
+        #init threads
+    WORKERS = 10
+    files = []
+    with ThreadPoolExecutor(max_workers = WORKERS) as exe:
+        iter = exe.map(thread_task, matter_links)
+        files = list(iter)
+        
 
     #await threads
 
@@ -27,3 +36,7 @@ def fetch_list(matter_links: list, folder: str):
             checked_urls.append(link)
         file.write(checked_urls)
     #return list of filenames
+
+def thread_task(matter_link: str, folder: str) -> str:    
+    filename = f"{folder}/{matter_link}"
+    return filename
