@@ -12,9 +12,14 @@ def fetch_list(matter_links: list):
     print("Checking filenames...")
     checked_urls = []
     CHECKED_FILENAME = f"{DATA_PATH}{SLASH}checked_urls.json"
-    if(os.stat(CHECKED_FILENAME).st_size != 0):
-        with open(CHECKED_FILENAME, "r") as file:
-            checked_urls = json.load(file)
+    try: 
+        if(os.stat(CHECKED_FILENAME).st_size != 0):
+            with open(CHECKED_FILENAME, "r") as file:
+                checked_urls = json.load(file)
+    except:
+        print("Creating checked_urls.json...")
+        with open(CHECKED_FILENAME, 'w') as file:
+            file.write("")
     #remove already checked items from list
     print("Removing duplicate items...")
     for link in matter_links[:]:
@@ -35,17 +40,18 @@ def fetch_list(matter_links: list):
     #write out filename list to folder
     print("Writing filenames...")
     with open(f"{DATA_PATH}{SLASH}filenames.json", "a") as file:
+        filenames = []
         for filename in filename_list:
-            pass
-            #TODO: Uncomment following line!
-            #file.write(f"{filename}\n")
+            filenames.append(filename)
+        #TODO: Uncomment following line!
+        # json.dump(filenames, file, indent=4)
     #append newly checked urls to folder
     print("Writing URLS...")
     with open(f"{DATA_PATH}{SLASH}checked_urls.json", "a") as file:
         for link in matter_links:
             checked_urls.append(link)
         #TODO: Uncomment following line!
-        #json.dump(checked_urls, file)
+        # json.dump(checked_urls, file, indent=4)
     
     #return list of filenames
     print("Returning filename list...")
