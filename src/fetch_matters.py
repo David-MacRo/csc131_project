@@ -1,42 +1,82 @@
 from concurrent.futures import ThreadPoolExecutor
-
+import os
 import json
+import urllib.request
+import urllib.error
+import time
+
 from config import DATA_PATH, SLASH
 
-def fetch_list(matter_links: list, folder: str):
+def fetch_list(matter_links: list):
     #open checked from folder
-    with open(f"{DATA_PATH}{SLASH}checked_urls.json", "a") as file:
-        checked_urls = json.load(file)
+    print("Checking filenames...")
+    checked_urls = []
+    CHECKED_FILENAME = f"{DATA_PATH}{SLASH}checked_urls.json"
+    if(os.stat(CHECKED_FILENAME).st_size != 0):
+        with open(CHECKED_FILENAME, "r") as file:
+            checked_urls = json.load(file)
     #remove already checked items from list
+    print("Removing duplicate items...")
     for link in matter_links[:]:
         if link in checked_urls:
             matter_links.remove(link)
     #create threads and split into sublists
-        #split lists
-        #init threads
-    WORKERS = 10
-    files = []
+    print("Initiating threads...")
+    
+    WORKERS = 1
+    filename_list = []
+    
+    startTime = time.clock_gettime_ns(time.CLOCK_PROCESS_CPUTIME_ID)
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:
         iter = exe.map(thread_task, matter_links)
-        files = list(iter)
-        
-
-    #await threads
-
-    #merge returned filename sublists
+        filename_list = list(iter)
+    stopTime = time.clock_gettime_ns(time.CLOCK_PROCESS_CPUTIME_ID)
+    
+    print("Threads complete.")
+    print(f"Time taken: {(stopTime - startTime)/1000000000}")
 
     #write out filename list to folder
-    with open(f"{DATA_PATH}{SLASH}checked_matters.json", "a") as file:
-        for filename in checked_matters:
-            file.write(f"filename\n")
+    print("Writing filenames...")
+    with open(f"{DATA_PATH}{SLASH}filenames.json", "a") as file:
+        for filename in filename_list:
+            pass
+            #TODO: Uncomment following line!
+            #file.write(f"{filename}\n")
     #append newly checked urls to folder
-    with open(f"{DATA_PATH}{SLASH}checked_urls.json", "w") as file:
-        checked_urls = json.load(file)
+    print("Writing URLS...")
+    with open(f"{DATA_PATH}{SLASH}checked_urls.json", "a") as file:
         for link in matter_links:
             checked_urls.append(link)
-        file.write(checked_urls)
+        #TODO: Uncomment following line!
+        #json.dump(checked_urls, file)
+    
     #return list of filenames
+    print("Returning filename list...")
+    return filename_list
 
-def thread_task(matter_link: str, folder: str) -> str:    
-    filename = f"{folder}/{matter_link}"
+def thread_task(matter_link: str) -> str:  
+    versions = json.loads(_urlopen(f"{matter_link}/Versions"))
+    key = versions[0].get("Key")
+    
+    text = _urlopen(f"{matter_link}/Texts/{key}")
+    matter_text_id = json.loads(text).get("MatterTextId")
+
+    filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt"
+    with open(filename, "w") as file:
+        file.write(text)
+
     return filename
+
+def _urlopen(url: str) -> any:
+    wait_length = 0.5
+    while True:
+        wait_length = wait_length * 2
+        try:
+            with urllib.request.urlopen(url, timeout=20) as resp:
+                return resp.read().decode("utf-8")
+        except urllib.error.HTTPError as exc:
+            print(f"  [HTTP {exc.code}] {url}")
+            time.sleep(wait_length)
+        except Exception as exc:
+            print(f"  [ERROR] {url} – {exc}")
+            time.sleep(wait_length)
