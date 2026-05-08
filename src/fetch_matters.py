@@ -26,14 +26,11 @@ def fetch_list(matter_links: list):
     WORKERS = 1
     filename_list = []
     
-    startTime = time.clock_gettime_ns(time.CLOCK_PROCESS_CPUTIME_ID)
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:
         iter = exe.map(thread_task, matter_links)
-        filename_list = list(iter)
-    stopTime = time.clock_gettime_ns(time.CLOCK_PROCESS_CPUTIME_ID)
-    
     print("Threads complete.")
-    print(f"Time taken: {(stopTime - startTime)/1000000000}")
+    filename_list = list(iter)
+    
 
     #write out filename list to folder
     print("Writing filenames...")
