@@ -58,8 +58,8 @@ def thread_task(matter_link: str) -> str:
     text = json.loads(_urlopen(f"{matter_link}/Texts/{key}"))
     matter_text_id = text.get("MatterTextId")
 
-    filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt".encode("ascii", "ignore")
-    with open(filename, "w") as file:
+    filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt"
+    with open(filename, "w", encoding='utf-8') as file:
         if(text["MatterTextPlain"] is not None):
             file.write(text["MatterTextPlain"])
         else:
