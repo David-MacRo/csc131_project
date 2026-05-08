@@ -37,14 +37,19 @@ def fetch_list(matter_links: list):
 
     #write out filename list to folder
     print("Writing filenames...")
-    with open(f"{DATA_PATH}{SLASH}filenames.json", "a") as file:
-        filenames = []
+    with open(f"{DATA_PATH}{SLASH}filenames.json", "r+") as file:
+        try:
+            filenames = json.load(file)
+        except:
+            filenames = []
+        file.seek(0)
         for filename in filename_list:
             filenames.append(filename)
+        
         json.dump(filenames, file, indent=4)
     #append newly checked urls to folder
     print("Writing URLS...")
-    with open(CHECKED_FILENAME, "a") as file:
+    with open(CHECKED_FILENAME, "r+") as file:
         for link in matter_links:
             checked_urls.append(link)
         json.dump(checked_urls, file, indent=4)
