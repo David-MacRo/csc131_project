@@ -9,17 +9,15 @@ from config import DATA_PATH, SLASH
 
 def fetch_list(matter_links: list):
     #open checked from folder
-    print("Checking filenames...")
+    print("Checking saved URLs...")
     checked_urls = []
     CHECKED_FILENAME = f"{DATA_PATH}{SLASH}checked_urls.json"
     try: 
-        if(os.stat(CHECKED_FILENAME).st_size != 0):
-            with open(CHECKED_FILENAME, "r") as file:
-                checked_urls = json.load(file)
+        with open(CHECKED_FILENAME, "r") as file:
+            checked_urls = json.load(file)
     except:
-        print("Creating checked_urls.json...")
-        with open(CHECKED_FILENAME, 'w') as file:
-            file.write("")
+        print("No saved URLs")
+    
     #remove already checked items from list
     print("Removing duplicate items...")
     for link in matter_links[:]:
@@ -43,15 +41,13 @@ def fetch_list(matter_links: list):
         filenames = []
         for filename in filename_list:
             filenames.append(filename)
-        #TODO: Uncomment following line!
-        # json.dump(filenames, file, indent=4)
+        json.dump(filenames, file, indent=4)
     #append newly checked urls to folder
     print("Writing URLS...")
-    with open(f"{DATA_PATH}{SLASH}checked_urls.json", "a") as file:
+    with open(CHECKED_FILENAME, "a") as file:
         for link in matter_links:
             checked_urls.append(link)
-        #TODO: Uncomment following line!
-        # json.dump(checked_urls, file, indent=4)
+        json.dump(checked_urls, file, indent=4)
     
     #return list of filenames
     print("Returning filename list...")
