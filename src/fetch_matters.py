@@ -58,7 +58,7 @@ def thread_task(matter_link: str) -> str:
     text = json.loads(_urlopen(f"{matter_link}/Texts/{key}"))
     matter_text_id = text.get("MatterTextId")
 
-    filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt"
+    filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt".encode("ascii", "ignore")
     with open(filename, "w") as file:
         if(text["MatterTextPlain"] is not None):
             file.write(text["MatterTextPlain"])
@@ -75,8 +75,8 @@ def _urlopen(url: str) -> any:
             with urllib.request.urlopen(url, timeout=20) as resp:
                 return resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
-            print(f"  [HTTP {exc.code}] {url}")
+            #print(f"  [HTTP {exc.code}] {url}")
             time.sleep(wait_length)
         except Exception as exc:
-            print(f"  [ERROR] {url} – {exc}")
+            #print(f"  [ERROR] {url} – {exc}")
             time.sleep(wait_length)
