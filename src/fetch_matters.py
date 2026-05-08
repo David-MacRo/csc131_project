@@ -23,7 +23,7 @@ def fetch_list(matter_links: list):
     #create threads and split into sublists
     print("Initiating threads...")
     
-    WORKERS = 1
+    WORKERS = 100
     filename_list = []
     
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:
@@ -55,12 +55,15 @@ def thread_task(matter_link: str) -> str:
     versions = json.loads(_urlopen(f"{matter_link}/Versions"))
     key = versions[0].get("Key")
     
-    text = _urlopen(f"{matter_link}/Texts/{key}")
-    matter_text_id = json.loads(text).get("MatterTextId")
+    text = json.loads(_urlopen(f"{matter_link}/Texts/{key}"))
+    matter_text_id = text.get("MatterTextId")
 
     filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt"
     with open(filename, "w") as file:
-        file.write(text)
+        if(text["MatterTextPlain"] is not None):
+            file.write(text["MatterTextPlain"])
+        else:
+            file.write("")
 
     return filename
 

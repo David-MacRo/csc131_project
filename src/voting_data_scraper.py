@@ -20,7 +20,7 @@ def main() -> None:
     # # opens the file containing the item ids that have been voted on
     event_item_ids = get_event_item_ids_from_file()
     matter_links = list_matter_links(event_item_ids)
-    fetch_list(matter_links, "Aa")
+    print(fetch_list(matter_links))
 
     # downloads the "Summary Report" for the agendas that have been voted on
     # can be commented out after it has been ran once for testing
