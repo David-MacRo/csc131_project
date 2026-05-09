@@ -11,9 +11,10 @@ def fetch_list(matter_links: list):
     #open checked from folder
     print("Checking saved URLs...")
     checked_urls = []
-    CHECKED_FILENAME = f"{DATA_PATH}{SLASH}checked_urls.json"
+    CHECKED_URL_FILE = f"{DATA_PATH}{SLASH}checked_urls.json"
+    SAVED_FILENAME_FILE = f"{DATA_PATH}{SLASH}filenames.json"
     try: 
-        with open(CHECKED_FILENAME, "r") as file:
+        with open(CHECKED_URL_FILE, "r") as file:
             checked_urls = json.load(file)
     except:
         print("No saved URLs")
@@ -37,26 +38,35 @@ def fetch_list(matter_links: list):
 
     #write out filename list to folder
     print("Writing filenames...")
-    with open(f"{DATA_PATH}{SLASH}filenames.json", "r+") as file:
-        try:
-            filenames = json.load(file)
-        except:
-            filenames = []
-        file.seek(0)
-        for filename in filename_list:
-            filenames.append(filename)
-        
-        json.dump(filenames, file, indent=4)
+    try:
+        with open(SAVED_FILENAME_FILE, "r") as file:
+            complete_filenames = json.load(file)
+    except:
+        complete_filenames = []
+    
+    for filename in filename_list:
+        complete_filenames.append(filename)
+    
+    with open(SAVED_FILENAME_FILE, "w") as file:
+        json.dump(complete_filenames, file, indent=4)
+    
     #append newly checked urls to folder
     print("Writing URLS...")
-    with open(CHECKED_FILENAME, "r+") as file:
-        for link in matter_links:
-            checked_urls.append(link)
-        json.dump(checked_urls, file, indent=4)
+    try:
+        with open(CHECKED_URL_FILE, "r") as file:
+            complete_url = json.load(file)
+    except:
+        complete_url = []
+    
+    for link in matter_links:
+        complete_url.append(link)
+    
+    with open(CHECKED_URL_FILE, "w") as file:
+        json.dump(complete_url, file, indent=4)
     
     #return list of filenames
     print("Returning filename list...")
-    return filename_list
+    return complete_filenames
 
 def thread_task(matter_link: str) -> str:  
     versions = json.loads(_urlopen(f"{matter_link}/Versions"))
@@ -65,7 +75,7 @@ def thread_task(matter_link: str) -> str:
     text = json.loads(_urlopen(f"{matter_link}/Texts/{key}"))
     matter_text_id = text.get("MatterTextId")
 
-    filename = f"{DATA_PATH}{SLASH}matter_text_{matter_text_id}.txt"
+    filename = f"{DATA_PATH}{SLASH}texts{SLASH}matter_text_{matter_text_id}.txt"
     with open(filename, "w", encoding='utf-8') as file:
         if(text["MatterTextPlain"] is not None):
             file.write(text["MatterTextPlain"])
