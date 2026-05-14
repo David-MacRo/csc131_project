@@ -15,7 +15,7 @@ def match(matter_files: list) -> list:
 
     # first stage has the most files
     # so do the simplest check which removes the most files
-    print("Searching files for interest...")
+    print("Searching texts for interest...")
     files_with_interests = []
     for file in matter_files:
         interests = check_file(file, INTERESTS)
@@ -59,8 +59,8 @@ def match(matter_files: list) -> list:
         return conflicts
 
     # less performant checks, but less files *to* check
-    print("Starting threads to match each file...")
-    WORKERS = 50
+    print("Starting threads to match each text...")
+    WORKERS = 100
     output = []
     
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:

@@ -17,7 +17,7 @@ def delete_data():
         os.remove(file_path)
     os.remove(CHECKED_URL_FILE)
     os.remove(SAVED_FILENAME_FILE)
-    os.remove(EVENT_ITEM_ID_FILE)
+    # os.remove(EVENT_ITEM_ID_FILE)
     os.remove(CONFLICTS_FILE)
 
 delete_data()
