@@ -8,7 +8,13 @@ The matcher takes the input interest names from:
 then converts the names to lowercase, and splits them on the # symbol
 
 For example:
-"HPQ#HP#Hewlett Packard"
+"HPQ#Hewlett-Packard#Hewlett Packard"
 
 will match with:
-"hpq", "hp", or "hewlett packard"
+"hpq", "hewlett-packard", or "hewlett packard"
+
+Reccomendations:
+- include names, but remove "llc" "co" or similar
+- offer different versions for hyphenated names, as spaces are commonly used as an alternative
+- include stock tickers if you care about them, but you probably don't tbh
+- don't include abbreviations which are short enough to commonly occur in other words: ex "hp"
