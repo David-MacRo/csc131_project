@@ -478,7 +478,7 @@
             <thead>
               <tr>
                 <th>Conflicting People</th>
-                <th>Matter ID</th>
+                <th>Vote</th>
                 <th>Conflict</th>
                 <th>Filename</th>
               </tr>
@@ -606,15 +606,23 @@
         if (conflicts.length > 0) {
           conflicts.forEach(row => {
             // Parse arrays if they exist, otherwise use empty string
-            const peopleStr = row.name;
-            const conflictStr = row.interest;
+            const peopleStr = row.name.toUpperCase();
+            const conflictStr = row.interest.toUpperCase();
 
             if ((peopleStr.toLowerCase().includes(nameInput.toLowerCase())) && conflictStr.toLowerCase().includes(conInput.toLowerCase())) {
             const tr = document.createElement('tr');
 
+            if (row.vote === "Aye") {
+              color = "#4dbf85";
+            } else if (row.vote === "Nay") {
+              color = "#f05c5c";
+            } else {
+              color = "#9aa3b0";
+            }
+
             tr.innerHTML = `
               <td class="conflict-flag">${peopleStr}</td>
-              <td class="matter-cell">${row.matterID || ''}</td>
+              <td class="matter-cell"><a style="color: ${color}">${row.vote.toUpperCase() || ''}</td>
               <td>${conflictStr}</td>
               <td class="file-cell"><a href=".${row.file}" target="_blank" style="color: var(--blue); text-decoration: none;">${row.file}</a></td>
             `;
