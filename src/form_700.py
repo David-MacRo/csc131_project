@@ -44,10 +44,7 @@ def load_name_interest_dict() -> dict:
                 if row[1].value is not None and row[1].value != "First Name":
                     name = f"{row[1].value} {row[0].value}"
                     interest = row[11].value
-                    if name not in form_700_data.keys():
-                        form_700_data.update({name : [interest]})
-                    else:
-                        form_700_data[name].append(interest)
+                    form_700_data.update({interest : name})
     print(form_700_data)
 
     return form_700_data

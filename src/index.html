@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FPPC — Conflict of Interest Identifier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0c0d0f;
+      --surface:   #111316;
+      --surface-2: #181b1f;
+      --surface-3: #1e2228;
+      --border:    #23272e;
+      --border-2:  #2e343d;
+      --text:      #e2e6ec;
+      --text-2:    #9aa3b0;
+      --text-3:    #4e5866;
+      --danger:    #f05c5c;
+      --t-danger:  rgba(240,92,92,.08);
+      --b-danger:  rgba(240,92,92,.2);
+      --blue:      #5a9cf5;
+      --t-blue:    rgba(90,156,245,.08);
+      --b-blue:    rgba(90,156,245,.2);
+      --green:     #4dbf85;
+      --t-green:   rgba(77,191,133,.08);
+      --b-green:   rgba(77,191,133,.2);
+      --amber:     #e8a84a;
+      --t-amber:   rgba(232,168,74,.08);
+      --b-amber:   rgba(232,168,74,.2);
+      --font-d: 'Syne', sans-serif;
+      --font-b: 'DM Sans', sans-serif;
+      --r: 8px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ---- HEADER ---- */
+    .site-header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      height: 56px;
+      gap: 12px;
+    }
+    .logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font-b);
+    }
+    .logo-sq {
+      width: 28px; height: 28px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+    }
+    .logo-sq span { background: var(--blue); border-radius: 2px; }
+    .logo-sq span:nth-child(2),
+    .logo-sq span:nth-child(3) { opacity: .4; }
+    .logo-sq span:nth-child(4) { opacity: .7; }
+    .logo-org {
+      font-family: var(--font-d);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .logo-sep { color: var(--text-3); font-size: 13px; }
+    .logo-name { font-size: 13px; color: var(--text-3); }
+
+    .header-nav { margin-left: auto; display: flex; gap: 4px; }
+    .nav-btn {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-3);
+      background: none;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-b);
+      transition: background .15s, color .15s;
+    }
+    .nav-btn:hover { background: var(--surface-2); color: var(--text); }
+    .nav-btn.active { background: var(--t-blue); color: var(--blue); }
+
+    /* ---- VIEWS ---- */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ---- SHARED PAGE LAYOUT ---- */
+    .page {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .page-wide {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+    .page-eyebrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .eyebrow-chip {
+      font-family: monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      color: var(--blue);
+      background: var(--t-blue);
+      border: 1px solid var(--b-blue);
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .page-title {
+      font-family: var(--font-d);
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+    .page-sub {
+      font-size: 14px;
+      color: var(--text-3);
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    /* ---- CARD ---- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      margin-bottom: 16px;
+      animation: slide-in .35s ease-out;
+    }
+    .card-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-hd-icon {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      background: var(--t-blue);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-hd-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: .01em;
+    }
+
+    /* ---- FORM ---- */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      padding: 20px;
+      border: none;
+    }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-3);
+      letter-spacing: .03em;
+    }
+    .field input {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 9px 13px;
+      font-family: var(--font-b);
+      font-size: 13.5px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+      width: 100%;
+    }
+    .field input::placeholder { color: var(--text-3); }
+    .field input:focus { border-color: var(--blue); }
+
+    .search-wrap { padding: 0 20px 20px; }
+    .search-btn {
+      width: 100%;
+      padding: 11px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: var(--blue);
+      color: #fff;
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: opacity .15s, transform .1s;
+    }
+    .search-btn:hover { opacity: .87; }
+    .search-btn:active { transform: scale(.98); }
+
+    /* ---- MESSAGES ---- */
+    .no-results {
+      display: none;
+      padding: 14px 18px;
+      border-radius: var(--r);
+      background: var(--t-green);
+      border: 1px solid var(--b-green);
+      color: var(--green);
+      font-size: 13.5px;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 16px;
+      animation: fade-in .25s ease;
+    }
+
+    .loader {
+      display: none;
+      margin: 20px auto;
+      border: 4px solid rgba(90,156,245,.18);
+      border-top: 4px solid var(--blue);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+    }
+
+    /* ---- RESULTS ---- */
+    .results-section { display: none; animation: fade-in .3s ease; }
+    .results-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .results-title {
+      font-family: var(--font-d);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--danger);
+    }
+    .count-chip {
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+      background: var(--t-danger);
+      color: var(--danger);
+      border: 1px solid var(--b-danger);
+    }
+
+    /* ---- TABLE ---- */
+    .tbl-outer {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: var(--surface-2);
+      padding: 10px 16px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-2);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface-2); }
+    .conflict-flag { color: var(--danger); font-weight: 600; font-size: 13.5px; }
+    .matter-cell { color: var(--amber); font-family: monospace; font-size: 12px; }
+    .file-cell { font-family: monospace; font-size: 12px; color: var(--text-2); }
+
+    /* ---- NOTIFY BUTTON ---- */
+    .notify-btn {
+      margin-top: 14px;
+      width: 100%;
+      padding: 11px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid var(--b-danger);
+      color: var(--danger);
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .15s, transform .1s;
+    }
+    .notify-btn:hover { background: var(--t-danger); }
+    .notify-btn:active { transform: scale(.98); }
+    .footer-note { text-align: center; font-size: 11.5px; color: var(--text-3); margin-top: 10px; }
+
+    /* ---- TEAM GRID ---- */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .member-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px 20px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      transition: border-color .2s, background .2s;
+    }
+    .member-card:hover { border-color: var(--border-2); background: var(--surface-2); }
+    .avatar {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-d);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .avatar-blue  { background: var(--t-blue);  color: var(--blue);  border: 1px solid var(--b-blue); }
+    .avatar-green { background: var(--t-green); color: var(--green); border: 1px solid var(--b-green); }
+    .avatar-amber { background: var(--t-amber); color: var(--amber); border: 1px solid var(--b-amber); }
+    .member-info { text-align: center; }
+    .member-name { font-family: var(--font-d); font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .role-chip {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: monospace;
+      letter-spacing: .06em;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+    .role-frontend { background: var(--t-blue);  color: var(--blue);  border: 1px solid var(--b-blue); }
+    .role-backend  { background: var(--t-green); color: var(--green); border: 1px solid var(--b-green); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 700px) {
+      .team-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .site-header { padding: 0 16px; }
+      .page, .page-wide { padding: 32px 16px 60px; }
+      .page-title { font-size: 26px; }
+      .logo-name { display: none; }
+    }
+    @media (max-width: 440px) {
+      .team-grid { grid-template-columns: 1fr; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <button class="logo-mark" onclick="showView('dashboard')">
+      <div class="logo-sq">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <span class="logo-org">FPPC</span>
+    </button>
+    <span class="logo-sep">·</span>
+    <span class="logo-name">Conflict of Interest Identifier</span>
+    <nav class="header-nav">
+      <button class="nav-btn active" id="nav-dashboard" onclick="showView('dashboard')">Dashboard</button>
+      <button class="nav-btn" id="nav-team" onclick="showView('team')">Team</button>
+    </nav>
+  </header>
+
+  <!-- ===== DASHBOARD VIEW ===== -->
+  <div class="view active" id="view-dashboard">
+    <main class="page">
+      <div class="page-eyebrow">
+        <span class="eyebrow-chip">FILING DASHBOARD</span>
+      </div>
+      <h1 class="page-title">Check for Conflicts</h1>
+      <p class="page-sub">Search by name or conflict to identify potential conflicts of interest</p>
+
+      <div class="card">
+        <div class="card-hd">
+          <div class="card-hd-icon">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <circle cx="5.5" cy="5.5" r="4" stroke="#5a9cf5" stroke-width="1.4"/>
+              <path d="M9 9l2.5 2.5" stroke="#5a9cf5" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="card-hd-title">Search Parameters</span>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="name">Individual Name</label>
+            <input id="name" type="text" placeholder="e.g. Thomas Morrissey" autocomplete="off"/>
+          </div>
+          <div class="field">
+            <label for="conflict">Conflict</label>
+            <input id="conflict" type="text" placeholder="e.g. Bank of America" autocomplete="off"/>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <button class="search-btn" id="check-btn">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="6" cy="6" r="4.5" stroke="white" stroke-width="1.4"/>
+              <path d="M10 10l2.5 2.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            Check for Conflicts
+          </button>
+        </div>
+      </div>
+
+      <div id="loader" class="loader"></div>
+      <div class="no-results" id="no-results">✅ No conflicts found for the entered information.</div>
+
+      <div class="results-section" id="result-section">
+        <div class="results-hd">
+          <span class="results-title">Potential Conflicts Found</span>
+          <span class="count-chip" id="result-count">0 records</span>
+        </div>
+        <div class="tbl-outer">
+          <table>
+            <thead>
+              <tr>
+                <th>Conflicting People</th>
+                <th>Matter ID</th>
+                <th>Conflict</th>
+                <th>Filename</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <button class="notify-btn" id="notify-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <rect x="1" y="2.5" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M1 5l6 3.5L13 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          Send Conflict Alert via Outlook
+        </button>
+        <p class="footer-note">Opens Outlook with a pre-filled conflict alert to your team</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ===== TEAM VIEW ===== -->
+  <div class="view" id="view-team">
+    <main class="page-wide">
+      <div class="page-eyebrow">
+        <span class="eyebrow-chip">HORNET BRAINERS</span>
+      </div>
+      <h1 class="page-title">Meet the Team</h1>
+      <p class="page-sub">The people behind the FPPC Conflict of Interest Identifier</p>
+      <div class="team-grid">
+        <div class="member-card">
+          <div class="avatar avatar-blue">TG</div>
+          <div class="member-info">
+            <div class="member-name">Tarun Gosain</div>
+            <span class="role-chip role-frontend">Frontend</span>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="avatar avatar-blue">MK</div>
+          <div class="member-info">
+            <div class="member-name">Mustafa Khan</div>
+            <span class="role-chip role-frontend">Frontend</span>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="avatar avatar-green">DM</div>
+          <div class="member-info">
+            <div class="member-name">David MacRoberts</div>
+            <span class="role-chip role-backend">Backend</span>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="avatar avatar-green">GR</div>
+          <div class="member-info">
+            <div class="member-name">Gavin Ruggiero</div>
+            <span class="role-chip role-backend">Backend</span>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="avatar avatar-amber">AB</div>
+          <div class="member-info">
+            <div class="member-name">Andrew Berg</div>
+            <span class="role-chip role-backend">Backend</span>
+          </div>
+        </div>
+        <div class="member-card">
+          <div class="avatar avatar-amber">RG</div>
+          <div class="member-info">
+            <div class="member-name">Raul Garcia Aguirre</div>
+            <span class="role-chip role-backend">Backend</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ---- NAV ----
+    function showView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('view-' + view).classList.add('active');
+      document.getElementById('nav-' + view).classList.add('active');
+    }
+
+    checkForConflicts();
+
+    document.getElementById('check-btn').addEventListener('click', checkForConflicts);
+    
+    async function checkForConflicts() {
+      const nameInput = document.getElementById('name').value.trim();
+      const conInput = document.getElementById('conflict').value.trim();
+
+      // If nothing is typed at all, do nothing
+      // if (!nameInput && !conInput && !emailInput && !jurisInput) {
+      //   alert('Please fill in at least one field to search.');
+      //   return;
+      // }
+
+      // Show loading spinner
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('result-section').style.display = 'none';
+      document.getElementById('no-results').style.display = 'none';
+
+      try {
+        // Prepare the query string to send to the backend
+        const queryParams = new URLSearchParams({
+          name: nameInput,
+          conflict: conInput,
+        });
+
+        // Call the Backend API (The Brain)
+        // Note: Make sure this URL matches your actual new backend URL!
+        const response = await fetch("../data/conflicts.json");
+        const data = await response.json();
+
+        // The new backend returns an object like { "one": {...}, "two": {...} }
+        // We convert it to an array to easily loop through it
+        const conflicts = data;
+
+        const resultsBody = document.getElementById('results-body');
+        resultsBody.innerHTML = '';
+
+        let conflictsCount = 0;
+
+        // Display the results
+        if (conflicts.length > 0) {
+          conflicts.forEach(row => {
+            // Parse arrays if they exist, otherwise use empty string
+            const peopleStr = row.name;
+            const conflictStr = row.interest;
+
+            if ((peopleStr.toLowerCase().includes(nameInput.toLowerCase())) && conflictStr.toLowerCase().includes(conInput.toLowerCase())) {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+              <td class="conflict-flag">${peopleStr}</td>
+              <td class="matter-cell">${row.matterID || ''}</td>
+              <td>${conflictStr}</td>
+              <td class="file-cell"><a href=".${row.file}" target="_blank" style="color: var(--blue); text-decoration: none;">${row.file}</a></td>
+            `;
+            resultsBody.appendChild(tr);
+            conflictsCount++;
+            }
+          });
+
+          document.getElementById('result-count').textContent = conflictsCount + ' record' + (conflicts.length !== 1 ? 's' : '');
+          document.getElementById('result-section').style.display = 'block';
+        } else {
+          document.getElementById('no-results').style.display = 'block';
+        }
+
+        // Store conflicts globally in case they want to email them
+        window.currentConflicts = conflicts;
+
+      }
+      catch (error) {
+        console.error("Failed to fetch from backend:", error);
+      } finally {
+        // Hide loader
+        document.getElementById('loader').style.display = 'none';
+      }
+    };
+
+    document.getElementById('notify-btn').addEventListener('click', function () {
+      const conflicts = window.currentConflicts || [];
+      if (conflicts.length === 0) return;
+
+      let emailBody = 'CONFLICT OF INTEREST ALERT%0D%0A%0D%0A';
+      emailBody += 'The following potential conflicts were detected:%0D%0A%0D%0A';
+      conflicts.forEach(row => {
+        const peopleStr = row.name;
+        const conflictStr = row.interest;
+
+        emailBody += `Conflicting People: ${peopleStr}%0D%0A`;
+        emailBody += `Matter ID: ${row.matterID || ''}%0D%0A`;
+        emailBody += `Conflict: ${conflictStr}%0D%0A`;
+        emailBody += `Filename: ${row.file || ''}%0D%0A`;
+        emailBody += `----%0D%0A`;
+      });
+
+      const teamEmail = 'mustafakhan2@outlook.com';
+      window.location.href = `mailto:${teamEmail}?subject=FPPC Conflict of Interest Alert&body=${emailBody}`;
+    });
+  </script>
+
+</body>
+</html>

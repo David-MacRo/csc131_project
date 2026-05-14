@@ -16,3 +16,5 @@ def delete_data():
         os.remove(file_path)
     os.remove(CHECKED_URL_FILE)
     os.remove(SAVED_FILENAME_FILE)
+
+delete_data()

@@ -1,8 +1,10 @@
 from persons import save_all_persons_votes, get_persons_from_file, find_all_event_items_voters, find_matter_votes
 from agendas import save_event_item_ids, get_event_item_ids_from_file, save_event_item_votes, fetch_matter_text, save_all_matter_texts, list_matter_links
 from fetch_matters import fetch_list
-from delete_data import delete_data
+# from delete_data import delete_data
 from matcher import match
+import os
+import webbrowser
 
 def main() -> None:
     # gets all persons who have voted and their votes and saves it to a file
@@ -24,6 +26,11 @@ def main() -> None:
     matter_links = list_matter_links(event_item_ids)
     matter_text_list = fetch_list(matter_links)
     match_list = match(matter_text_list)
+
+    print("Opening UI...")
+    webbrowser.open("http://localhost:8000/src")
+    os.system("python -m http.server")
+    webbrowser.open("http://localhost:8000/index.html")
 
     # downloads the "Summary Report" for the agendas that have been voted on
     # can be commented out after it has been ran once for testing
