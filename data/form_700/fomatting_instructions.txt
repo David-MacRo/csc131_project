@@ -1,0 +1,14 @@
+The matcher reads from relevant columns in the .xlsx file to aquire interest names to match against.
+However, standardizing the format of these inputs is a largely intractible task.
+
+The matcher takes the input interest names from:
+- A1 column NAME OF BUSINESS ENTITY
+- A2 column NAME OF BUSINESS ENTITY OR TRUST
+- C column NAME OF SOURCE
+then converts the names to lowercase, and splits them on the # symbol
+
+For example:
+"HPQ#HP#Hewlett Packard"
+
+will match with:
+"hpq", "hp", or "hewlett packard"
