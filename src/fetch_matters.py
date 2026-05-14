@@ -34,7 +34,6 @@ def fetch_list(matter_links: list):
         iter = exe.map(thread_task, matter_links)
     print("Threads complete.")
     filename_list = list(iter)
-    
 
     #write out filename list to folder
     print("Writing filenames...")
@@ -44,8 +43,7 @@ def fetch_list(matter_links: list):
     except:
         complete_filenames = []
     
-    for filename in filename_list:
-        complete_filenames.append(filename)
+    complete_filenames.extend(filename_list)
     
     with open(SAVED_FILENAME_FILE, "w") as file:
         json.dump(complete_filenames, file, indent=4)
@@ -68,14 +66,27 @@ def fetch_list(matter_links: list):
     print("Returning filename list...")
     return complete_filenames
 
-def thread_task(matter_link: str) -> str:  
+def thread_task(matter_link: str) -> str:
+    #aquire version data
     versions = json.loads(_urlopen(f"{matter_link}/Versions"))
-    key = versions[0].get("Key")
-    
-    text = json.loads(_urlopen(f"{matter_link}/Texts/{key}"))
-    matter_text_id = text.get("MatterTextId")
+    num_versions = len(versions)
+    if(num_versions == 0):
+        print(f"versions: {versions}")
 
-    filename = f"{DATA_PATH}{SLASH}texts{SLASH}matter_text_{matter_text_id}.txt"
+    #pick which version and get it, starting with the newest version
+    for i in range(num_versions-1,-1,-1):
+        key = versions[i].get("Key")
+        text = json.loads(_urlopen(f"{matter_link}/Texts/{key}"))
+
+        #use this version if it has text
+        if((text.get("MatterTextPlain") is None)):
+            print(text)
+            continue
+    
+    matter_id = text.get("MatterTextMatterId")
+    filename = f"{DATA_PATH}{SLASH}texts{SLASH}matter_text_{matter_id}.txt"
+
+    #store whichever version we picked
     with open(filename, "w", encoding='utf-8') as file:
         if(text["MatterTextPlain"] is not None):
             file.write(text["MatterTextPlain"])
