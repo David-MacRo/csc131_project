@@ -27,7 +27,7 @@ def match(matter_files: list) -> list:
             if key is None:
                 continue
             if interest.get("interest") in key.lower():
-                output.append({"name": name, "interest" : key, "file" : file})
+                output.append({"name": name, "interest" : key.split("#")[0], "file" : file})
     
     # print("files_with_conflicts:")
     # print(files_with_interests)

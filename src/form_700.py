@@ -30,7 +30,7 @@ def load_interests() -> list:
                 if row[11].value is not None and row[11].value != "1. Income Received" and "business entity" not in row[11].value.lower() and "NAME OF SOURCE" not in row[11].value:
                     interest = row[11].value
                     if interest not in interests:
-                        interests.append(interest)
+                        interests.extend(interest.split("#"))
     return interests
 
 def load_name_interest_dict() -> dict:
@@ -45,7 +45,6 @@ def load_name_interest_dict() -> dict:
                     name = f"{row[1].value} {row[0].value}"
                     interest = row[11].value
                     form_700_data.update({interest : name})
-    print(form_700_data)
 
     return form_700_data
 
