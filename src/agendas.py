@@ -1,7 +1,4 @@
-from typing import Optional, Any
 import json
-import urllib.request
-import re
 
 from api_calls import _get, _get_all 
 from config import SOL_START, SOL_END, DATA_PATH, SLASH, SUMMARY_PATH
@@ -31,10 +28,6 @@ def fetch_agenda_items(event_id: int) -> list[dict]:
     items = _get(f"events/{event_id}/eventitems", {"AgendaNote": 1})
     return items
 
-def fetch_event_item_detail(event_id: int, event_item_id: int) -> list[dict]:
-    detail = _get(f"events/{event_id}/eventitems/{event_item_id}")
-    return detail
-
 def fetch_event_item_ids() -> None:
     events = fetch_events()
     event_item_ids = {}
@@ -50,20 +43,6 @@ def fetch_event_item_ids() -> None:
         
     return {event_id: event_item_id_list for event_id, event_item_id_list in event_item_ids.items() if event_item_id_list != []}
 
-def fetch_event_item_votes(event_item_id: int) -> None:
-    event_item_votes = _get(f"eventitems/{event_item_id}/votes")
-    return event_item_votes
-
-def fetch_all_votes(event_item_ids) -> None:
-    event_item_votes = {}
-    for event_id, item_ids in event_item_ids.items():
-        for item_id, matter_id in item_ids:
-            votes = fetch_event_item_votes(item_id)
-            print(votes)
-            if votes != []:
-                event_item_votes.update({item_id: votes})
-    return event_item_votes
-
 def list_matter_links(event_item_ids):
     matter_links = []
     for event_id, item_ids in event_item_ids.items():
@@ -74,33 +53,6 @@ def list_matter_links(event_item_ids):
     # with open(f"{DATA_PATH}{SLASH}matter_links.json", 'w') as file:
     #     json.dump(matter_links, file, indent=4)
     return matter_links
-    
-
-def fetch_matter_text_version_number(matter_id: int):
-    version_numbers = _get(f"matters/{matter_id}/versions")
-    return version_numbers[len(version_numbers) - 1]["Key"]
-
-def fetch_matter_text(matter_id: int) -> str:
-    matter_text = _get(f"matters/{matter_id}/texts/{fetch_matter_text_version_number(matter_id)}")
-    return matter_text
-
-def save_all_matter_texts(event_item_ids):
-    for event_id, item_ids in event_item_ids.items():
-        for event_item_id, matter_id in item_ids:
-            if matter_id == None:
-                continue
-            print(event_item_id, matter_id)
-            with open(f"{SUMMARY_PATH}{SLASH}{matter_id}_text.txt", 'w') as file:
-                matter_text = fetch_matter_text(matter_id)["MatterTextPlain"]
-                if matter_text is None:
-                    matter_text = ""
-                file.write(re.sub(r'[^A-Za-z0-9 ]+', '', matter_text))
-    return
-
-def save_event_item_votes(event_item_ids) -> None:
-    event_item_votes = fetch_all_votes(event_item_ids)
-    with open(f"{DATA_PATH}{SLASH}event_item_votes.json", 'w') as file:
-        json.dump(event_item_votes, file, indent=4)
 
 def save_event_item_ids() -> None:
     event_item_ids = fetch_event_item_ids()
