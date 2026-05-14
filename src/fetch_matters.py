@@ -79,7 +79,6 @@ def thread_task(matter_link: str) -> str:
 
         #use this version if it has text
         if((text.get("MatterTextPlain") is None)):
-            print(text)
             continue
     
     matter_id = text.get("MatterTextMatterId")

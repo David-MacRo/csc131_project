@@ -53,7 +53,7 @@ def match(matter_files: list) -> list:
                 if(name == voter_name):
                     vote_value_name = voter["VoteValueName"]
                     if((vote_value_name == "Aye") | (vote_value_name == "Nay")):
-                        conflict = {"name":name, "interest":interest, "file":filename, "vote":vote_value_name}
+                        conflict = {"name":name, "interest":interest, "file":filename, "vote":vote_value_name, "matterID": file_matter_ID}
                         if conflict not in conflicts:
                             conflicts.append(conflict)
         return conflicts
