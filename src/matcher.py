@@ -1,11 +1,12 @@
+from concurrent.futures import ThreadPoolExecutor
+import json
+import urllib
+import time
+
 from agendas import get_event_item_ids_from_file
 from config import DATA_PATH, SLASH, BASE_URL
 from form_700 import load_names, load_interests, load_name_interest_tuples
 
-import json
-import urllib
-import time
-FOUND_INTEREST = ""
 def match(matter_files: list) -> list:
     NAMES = load_names()
     INTERESTS = load_interests()
@@ -14,30 +15,19 @@ def match(matter_files: list) -> list:
 
     # first stage has the most files
     # so do the simplest check which removes the most files
-    print("Searching for matches...")
+    print("Searching files for interest...")
     files_with_interests = []
     for file in matter_files:
         interests = check_file(file, INTERESTS)
         if(len(interests) > 0):
             files_with_interests.append([file, interests])
 
-    # print("files with interests:")
-    # print(files_with_interests)
-
-    # less performant checks, but less files *to* check
-    '''
-    output = []
-    for file, interest in files_with_interests.items():
-        for key, name in NAME_INTEREST_DICT.items():
-            if key is None:
-                continue
-            if interest.get("interest") in key.lower():
-                output.append({"name": name, "interest" : key.split("#")[0], "file" : file})
-    '''
-
-    output = []
-    for filename, interests in files_with_interests:
+    #define thread task for threading
+    def thread_task(tuple):
+        filename = tuple[0]
+        interests = tuple[1]
         names = []
+        conflicts = []
         #conflict -> names
         for tuple in NAME_INTEREST_TUPLES:
             for entry in tuple[1:]:
@@ -46,7 +36,6 @@ def match(matter_files: list) -> list:
                         names.append([tuple[0], interest])
         #filename -> matter ID
         file_matter_ID = int("".join(char for char in filename if char.isdigit()))
-        
         #matterID -> eventItemID
         file_event_item_ID = 0
         for event_ID, pairs in EVENT_ITEM_ID_DICT.items():
@@ -62,29 +51,28 @@ def match(matter_files: list) -> list:
             for voter in data:
                 voter_name = voter["VotePersonName"].lower()
                 if(name == voter_name):
-                    print("Found!")
-                    print(voter)
-                    '''
-                    {
-                        'VoteId': 6835, 
-                        'VoteGuid': 'A2C3F851-3A0D-49D6-9892-3AB5FDD1CB91', 
-                        'VoteLastModifiedUtc': '2019-12-26T18:37:34.82', 
-                        'VoteRowVersion': 'AAAAAABONqQ=', 
-                        'VotePersonId': 547, 
-                        'VotePersonName': 'Lynda Hopkins', 
-                        'VoteValueId': 16, 
-                        'VoteValueName': 'Aye', 
-                        'VoteSort': 5, 
-                        'VoteResult': 1, 
-                        'VoteEventItemId': 29394
-                    }
-                    '''
                     vote_value_name = voter["VoteValueName"]
                     if((vote_value_name == "Aye") | (vote_value_name == "Nay")):
-                        conflict = {"name":name, "interest":interest, "file":filename, "vote":"TODO"}
-                        print(conflict)
-                        output.append(conflict)
+                        conflict = {"name":name, "interest":interest, "file":filename, "vote":vote_value_name}
+                        if conflict not in conflicts:
+                            conflicts.append(conflict)
+        return conflicts
+
+    # less performant checks, but less files *to* check
+    print("Starting threads to match each file...")
+    WORKERS = 50
+    output = []
     
+    with ThreadPoolExecutor(max_workers = WORKERS) as exe:
+        iter = exe.map(thread_task, files_with_interests)
+    print("Threads complete.")
+
+    for file_return_list in iter:
+        if(file_return_list is not None):
+            output.extend(file_return_list)
+
+    #for filename, interests in files_with_interests:
+       
     # print("files_with_conflicts:")
     # print(files_with_interests)
     output_matches(output)

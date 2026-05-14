@@ -25,10 +25,9 @@ def fetch_list(matter_links: list):
         if link in checked_urls:
             matter_links.remove(link)
     #create threads and split into sublists
-    print("Initiating threads...")
+    print("Initiating threads to fetch matters...")
     
     WORKERS = 100
-    filename_list = []
     
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:
         iter = exe.map(thread_task, matter_links)
