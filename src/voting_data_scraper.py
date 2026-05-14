@@ -7,7 +7,7 @@ import webbrowser
 def main() -> None:
     # gets item ids that have been voted on
     # can be commented out after it has been ran once for testing
-    # save_event_item_ids()
+    save_event_item_ids()
 
     # # opens the file containing the item ids that have been voted on
     event_item_ids = get_event_item_ids_from_file()

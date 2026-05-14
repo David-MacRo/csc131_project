@@ -21,7 +21,7 @@ def match(matter_files: list) -> list:
         interests = check_file(file, INTERESTS)
         if(len(interests) > 0):
             files_with_interests.append([file, interests])
-
+    print(f"    Found {len(files_with_interests)} text(s) with interests.")
     #define thread task for threading
     def thread_task(tuple):
         filename = tuple[0]
@@ -38,10 +38,9 @@ def match(matter_files: list) -> list:
         file_matter_ID = int("".join(char for char in filename if char.isdigit()))
         #matterID -> eventItemID
         file_event_item_ID = 0
-        for event_ID, pairs in EVENT_ITEM_ID_DICT.items():
-            for event_item_ID, matter_ID in pairs:
-                if(file_matter_ID == matter_ID):
-                    file_event_item_ID = event_item_ID
+        for event_item_ID, matter_ID in EVENT_ITEM_ID_DICT:
+            if(file_matter_ID == matter_ID):
+                file_event_item_ID = event_item_ID
         
         #name + eventItemID -> votes
         data = json.loads(_urlopen(f"{BASE_URL}/eventitems/{file_event_item_ID}/votes/"))
@@ -65,11 +64,12 @@ def match(matter_files: list) -> list:
     
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:
         iter = exe.map(thread_task, files_with_interests)
-    print("Threads complete.")
+    print("    Threads complete.")
 
     for file_return_list in iter:
         if(file_return_list is not None):
             output.extend(file_return_list)
+    print(f"    Found {len(output)} conflict(s).")
 
     #for filename, interests in files_with_interests:
        

@@ -1,4 +1,5 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
 
 from api_calls import _get, _get_all 
 from config import SOL_START, SOL_END, DATA_PATH, SLASH, SUMMARY_PATH
@@ -14,14 +15,14 @@ def fetch_events(start: str = SOL_START, end: str = SOL_END) -> list[dict]:
 
     Defaults to the 5-year statute of limitations window (2020–2025).
     """
-    print(f"Fetching events from {start} to {end} …")
+    print(f"Fetching events from {start} to {end}...")
 
     odata_filter = (
         f"EventDate ge datetime'{start}T00:00:00'"
         f" and EventDate le datetime'{end}T23:59:59'"
     )
     events = _get_all("events", {"$filter": odata_filter, "$orderby": "EventDate asc"})
-    print(f"  Found {len(events)} event(s).")
+    print(f"    Found {len(events)} event(s).")
     return events
 
 def fetch_agenda_items(event_id: int) -> list[dict]:
@@ -30,26 +31,31 @@ def fetch_agenda_items(event_id: int) -> list[dict]:
 
 def fetch_event_item_ids() -> None:
     events = fetch_events()
-    event_item_ids = {}
-    for event in events:
+    def thread_task(event):
         event_items = fetch_agenda_items(event["EventId"])
-        event_item_ids.update({event["EventId"]: []})
-
+        result = []
         for item in event_items:
             if item is None:
                 continue
             if item["EventItemId"] is not None and item["EventItemPassedFlag"] is not None:
-                event_item_ids[event['EventId']].append([item["EventItemId"], item["EventItemMatterId"]])
-        
-    return {event_id: event_item_id_list for event_id, event_item_id_list in event_item_ids.items() if event_item_id_list != []}
+                result.append([item["EventItemId"], item["EventItemMatterId"]])
+        return result
 
+    
+    WORKERS = 100
+    full_list = []
+    with ThreadPoolExecutor(max_workers = WORKERS) as exe:
+        iter = exe.map(thread_task, events)
+    for sub_list in iter:
+        full_list.extend(sub_list)
+
+    return full_list
 def list_matter_links(event_item_ids):
     matter_links = []
-    for event_id, item_ids in event_item_ids.items():
-        for item_id, matter_id in item_ids:
-            if matter_id is None:
-                continue
-            matter_links.append(f"https://webapi.legistar.com/v1/sonoma-county/matters/{matter_id}")
+    for item_id, matter_id in event_item_ids:
+        if matter_id is None:
+            continue
+        matter_links.append(f"https://webapi.legistar.com/v1/sonoma-county/matters/{matter_id}")
     # with open(f"{DATA_PATH}{SLASH}matter_links.json", 'w') as file:
     #     json.dump(matter_links, file, indent=4)
     return matter_links
