@@ -17,10 +17,11 @@ def fetch_list(matter_links: list):
         with open(CHECKED_URL_FILE, "r") as file:
             checked_urls = json.load(file)
     except:
-        print("No saved URLs")
+        print("    No saved URLs.")
     
     #remove already checked items from list
-    print("Removing duplicate items...")
+    if(len(checked_urls) > 0):
+        print("Removing duplicate items...")
     for link in matter_links[:]:
         if link in checked_urls:
             matter_links.remove(link)
@@ -31,7 +32,7 @@ def fetch_list(matter_links: list):
     
     with ThreadPoolExecutor(max_workers = WORKERS) as exe:
         iter = exe.map(thread_task, matter_links)
-    print("Threads complete.")
+    print("    Threads complete.")
     filename_list = list(iter)
 
     #write out filename list to folder

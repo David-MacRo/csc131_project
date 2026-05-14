@@ -104,8 +104,8 @@ def _urlopen(url: str) -> any:
             with urllib.request.urlopen(url, timeout=20) as resp:
                 return resp.read().decode("utf-8")
         except urllib.error.HTTPError as exc:
-            print(f"  [HTTP {exc.code}] {url}")
+            # print(f"  [HTTP {exc.code}] {url}")
             time.sleep(wait_length)
         except Exception as exc:
-            print(f"  [ERROR] {url} – {exc}")
+            # print(f"  [ERROR] {url} – {exc}")
             time.sleep(wait_length)
