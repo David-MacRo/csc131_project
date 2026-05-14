@@ -30,21 +30,27 @@ def load_interests() -> list:
                 if row[11].value is not None and row[11].value != "1. Income Received" and "business entity" not in row[11].value.lower() and "NAME OF SOURCE" not in row[11].value:
                     interest = row[11].value
                     if interest not in interests:
-                        interests.extend(interest.split("#"))
+                        interests.extend(interest.lower().split("#"))
     return interests
 
-def load_name_interest_dict() -> dict:
+# returns a list of [name, interest, <interest>]'s
+def load_name_interest_tuples() -> list:
     #TODO load file in future
     form_names = ["Schedule A1", "Schedule A-2", "Schedule C - Income Section"]
-    form_700_data = {}
+    form_700_data = []
     form = load_workbook(filename)
     for sheet in form:
         if sheet.title in form_names:
             for row in sheet:
                 if row[1].value is not None and row[1].value != "First Name":
-                    name = f"{row[1].value} {row[0].value}"
-                    interest = row[11].value
-                    form_700_data.update({interest : name})
+                    name = f"{row[1].value} {row[0].value}".lower()
+                    if row[11].value is not None:
+                        interests = row[11].value.lower().split("#")
+                    else:
+                        continue
+                    result = [name]
+                    result.extend(interests)
+                    form_700_data.append(result)
 
     return form_700_data
 
